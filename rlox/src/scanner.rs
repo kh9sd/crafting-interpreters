@@ -35,6 +35,21 @@ pub enum Token{
 //     return result;
 // }
 
+fn look_ahead_1_char(iter: &mut std::iter::Peekable<std::str::Chars<'_>>, char_to_match: char, if_match: Token, else_match: Token) -> Token {
+    match iter.peek() {
+        Some(char) => {
+            if (*char == char_to_match){
+                // consume this char
+                iter.next();
+                if_match
+            }
+            else {
+                else_match
+            }
+        }
+        None => else_match
+    }
+}
 
 fn scan_single_token(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Option<Token> {
     'main_loop: while let Some(current) = iter.next() {
@@ -51,53 +66,17 @@ fn scan_single_token(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Opt
             ';' => Token::SEMICOLON,
             '*' => Token::STAR,
 
-            '!' => {
-                let next: char = *iter.peek().unwrap_or(&'\0');
+            '!' =>
+                look_ahead_1_char(iter, '=', Token::BANG_EQUAL, Token::BANG),
 
-                if next == '='{
-                    iter.next();
-                    Token::BANG_EQUAL
-                }
-                else {
-                    Token::BANG
-                }
-            },
+            '=' =>
+                look_ahead_1_char(iter, '=', Token::EQUAL_EQUAL, Token::EQUAL),
 
-            '=' => {
-                let next: char = *iter.peek().unwrap_or(&'\0');
+            '<' =>
+                look_ahead_1_char(iter, '=', Token::LESS_EQUAL, Token::LESS),
 
-                if (next == '='){
-                    iter.next();
-                    Token::EQUAL_EQUAL
-                }
-                else {
-                    Token::EQUAL
-                }
-            },
-
-            '<' => {
-                let next: char = *iter.peek().unwrap_or(&'\0');
-
-                if next == '='{
-                    iter.next();
-                    Token::LESS_EQUAL
-                }
-                else {
-                    Token::LESS
-                }
-            },
-
-            '>' => {
-                let next: char = *iter.peek().unwrap_or(&'\0');
-
-                if next == '='{
-                    iter.next();
-                    Token::GREATER_EQUAL
-                }
-                else {
-                    Token::GREATER
-                }
-            },
+            '>' =>
+                look_ahead_1_char(iter, '=', Token::GREATER_EQUAL, Token::GREATER),
 
             //division or comment
             '/' => {
