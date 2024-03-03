@@ -22,19 +22,6 @@ pub enum Token{
     EOF
 }
 
-// fn scan_tokens(source_code: String) -> Vec<Token>{
-//     let mut result = Vec::new();
-
-//     let mut start: u32 = 0;
-//     let mut current: u32 = 0;
-//     let mut line: u32 = 1;
-
-    
-    
-//     result.push(Token::EOF);
-//     return result;
-// }
-
 fn look_ahead_1_char(iter: &mut std::iter::Peekable<std::str::Chars<'_>>, char_to_match: char, if_match: Token, else_match: Token) -> Token {
     match iter.peek() {
         Some(char) => {
@@ -135,6 +122,7 @@ mod tests {
     fn scan_tokens_tests() {
         assert_eq!(scanner::scan_tokens(& String::from("+")), vec![Token::PLUS, Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("")), vec![Token::EOF]);
+        assert_eq!(scanner::scan_tokens(& String::from("     ")), vec![Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("!=")), vec![Token::BANG_EQUAL, Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("!!=")), vec![Token::BANG, Token::BANG_EQUAL, Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("/")), vec![Token::SLASH, Token::EOF]);
@@ -143,5 +131,6 @@ mod tests {
         assert_eq!(scanner::scan_tokens(& String::from("//+")), vec![Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("//\n")), vec![Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("//\n+")), vec![Token::PLUS, Token::EOF]);
+        assert_eq!(scanner::scan_tokens(& String::from("//asdsad asd \n+")), vec![Token::PLUS, Token::EOF]);
     }
 }
