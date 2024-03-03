@@ -82,6 +82,7 @@ fn scan_single_token(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Opt
             '/' => {
                 let next_char = *iter.peek().unwrap_or(&'\0');
                 if next_char == '/' {
+                    // ignore rest of line
                     while let Some(next) = iter.peek() {
                         if *next == '\n' {
                             break;
@@ -92,7 +93,7 @@ fn scan_single_token(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Opt
                     continue 'main_loop;
                 }
 
-                
+                // else, not double //
                 Token::SLASH
             }
 
