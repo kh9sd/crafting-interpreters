@@ -37,9 +37,7 @@ pub enum Token{
 
 
 fn scan_single_token(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Option<Token> {
-    while let Some(c) = iter.next() {
-        let current: char = c;
-
+    'main_loop: while let Some(current) = iter.next() {
         let next_token = match current {
             // ez ones
             '(' => Token::LEFT_PAREN,
@@ -101,6 +99,27 @@ fn scan_single_token(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Opt
                 }
             },
 
+            //division or comment
+            '/' => {
+                let next_char = *iter.peek().unwrap_or(&'\0');
+                if next_char == '/' {
+                    while let Some(next) = iter.peek() {
+                        if *next == '\n' {
+                            break;
+                        }
+                        iter.next();
+                    }
+                    // lol fuck
+                    continue 'main_loop;
+                }
+
+                
+                Token::SLASH
+            }
+
+            ' ' | '\r' | '\t' => continue 'main_loop,
+            '\n' => continue 'main_loop, //TODO: line increment
+
             _ => todo!()
         };
 
@@ -138,5 +157,11 @@ mod tests {
         assert_eq!(scanner::scan_tokens(& String::from("")), vec![Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("!=")), vec![Token::BANG_EQUAL, Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("!!=")), vec![Token::BANG, Token::BANG_EQUAL, Token::EOF]);
+        assert_eq!(scanner::scan_tokens(& String::from("/")), vec![Token::SLASH, Token::EOF]);
+
+        assert_eq!(scanner::scan_tokens(& String::from("//")), vec![Token::EOF]);
+        assert_eq!(scanner::scan_tokens(& String::from("//+")), vec![Token::EOF]);
+        assert_eq!(scanner::scan_tokens(& String::from("//\n")), vec![Token::EOF]);
+        assert_eq!(scanner::scan_tokens(& String::from("//\n+")), vec![Token::PLUS, Token::EOF]);
     }
 }
