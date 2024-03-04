@@ -1,8 +1,8 @@
 use std::string;
+use std::collections::HashMap;
 
 
-
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Token{
     // Single-character tokens.
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
@@ -15,7 +15,7 @@ pub enum Token{
     LESS, LESS_EQUAL,
 
     // Literals.
-    IDENTIFIER, STRING(String), NUMBER(f64), 
+    IDENTIFIER(String), STRING(String), NUMBER(f64), 
 
     // Keywords.
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
@@ -92,7 +92,9 @@ fn get_numeric_literal(iter: &mut std::iter::Peekable<std::str::Chars<'_>>, firs
     // add fractional part
     let final_numeric_lit = match iter.peek() {
         Some(next) => {
-            if *next == '.' {
+            if *next == '.' { 
+                // TODO: needs one more peek ahead to check if actually digit after .
+                // requires external crate lol, for later
                 numeric_literal.push(iter.next().expect("We just peeked it"));
 
                 numeric_literal + &get_numeric_string(iter)
@@ -105,6 +107,42 @@ fn get_numeric_literal(iter: &mut std::iter::Peekable<std::str::Chars<'_>>, firs
     };
 
     Token::NUMBER(final_numeric_lit.parse().expect("This should be a valid number"))
+}
+
+
+fn get_identifers_or_keywords(iter: &mut std::iter::Peekable<std::str::Chars<'_>>, first_char: char) -> Token {
+    let mut identifier = String::new();
+    identifier.push(first_char);
+
+    while let Some(next) = iter.peek(){
+        if next.is_ascii_alphanumeric(){
+            identifier.push(iter.next().expect("We just peeked it"));
+        }
+        else {
+            break
+        }
+    }
+
+    // TODO: make this not run every fucking time
+    let mut keyword_map = HashMap::new();
+    keyword_map.insert("and",    Token::AND);
+    keyword_map.insert("class",  Token::CLASS);
+    keyword_map.insert("else",   Token::ELSE);
+    keyword_map.insert("false",  Token::FALSE);
+    keyword_map.insert("for",    Token::FOR);
+    keyword_map.insert("fun",    Token::FUN);
+    keyword_map.insert("if",     Token::IF);
+    keyword_map.insert("nil",    Token::NIL);
+    keyword_map.insert("or",     Token::OR);
+    keyword_map.insert("print",  Token::PRINT);
+    keyword_map.insert("return", Token::RETURN);
+    keyword_map.insert("super",  Token::SUPER);
+    keyword_map.insert("this",   Token::THIS);
+    keyword_map.insert("true",   Token::TRUE);
+    keyword_map.insert("var",    Token::VAR);
+    keyword_map.insert("while",  Token::WHILE);
+
+    keyword_map.get(identifier.as_str()).cloned().unwrap_or(Token::IDENTIFIER(identifier))
 }
 
 /**
@@ -164,7 +202,10 @@ fn scan_single_token(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Opt
                 if is_digit(other) {
                     get_numeric_literal(iter, other)
                 }
-                else{
+                else if other.is_ascii_alphanumeric() {
+                    get_identifers_or_keywords(iter, other)
+                }
+                else {
                     todo!()
                 }
             }
@@ -219,5 +260,10 @@ mod tests {
         assert_eq!(scanner::scan_tokens(& String::from("1.1")), vec![Token::NUMBER("1.1".parse().unwrap()), Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("1.1 2.2")), vec![Token::NUMBER("1.1".parse().unwrap()), 
         Token::NUMBER("2.2".parse().unwrap()), Token::EOF]);
+
+        assert_eq!(scanner::scan_tokens(& String::from("fuck")), vec![Token::IDENTIFIER(String::from("fuck")), Token::EOF]);
+        assert_eq!(scanner::scan_tokens(& String::from("and")), vec![Token::AND, Token::EOF]);
+        assert_eq!(scanner::scan_tokens(& String::from("and fuck")), vec![Token::AND, 
+        Token::IDENTIFIER(String::from("fuck")), Token::EOF]);
     }
 }
