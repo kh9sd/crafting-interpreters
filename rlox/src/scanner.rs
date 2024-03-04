@@ -15,7 +15,7 @@ pub enum Token{
     LESS, LESS_EQUAL,
 
     // Literals.
-    IDENTIFIER, STRING(String), NUMBER,
+    IDENTIFIER, STRING(String), NUMBER(f64), 
 
     // Keywords.
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
@@ -54,6 +54,58 @@ fn get_string_literal_token(iter: &mut std::iter::Peekable<std::str::Chars<'_>>)
     }
 
     return None
+}
+
+fn is_digit(c: char) -> bool {
+    match c {
+        '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => true,
+        _ => false
+    }
+}
+
+fn get_numeric_literal(iter: &mut std::iter::Peekable<std::str::Chars<'_>>, first_char: char) -> Token {
+    let mut numeric_literal = String::new();
+    numeric_literal.push(first_char);
+
+    while let Some(next) = iter.peek() {
+        let next_char = *next;
+        if is_digit(next_char){
+            numeric_literal.push(next_char);
+            iter.next();
+        }
+        else {
+            break;
+        }
+    }
+
+    // add fractional part
+    let final_numeric_lit = match iter.peek() {
+        Some(next) => {
+            if *next == '.' {
+                numeric_literal.push('.');
+                iter.next();
+
+                while let Some(next) = iter.peek() {
+                    let next_char = *next;
+                    if is_digit(next_char){
+                        numeric_literal.push(next_char);
+                        iter.next();
+                    }
+                    else {
+                        break;
+                    }
+                }
+                numeric_literal
+
+            }
+            else {
+                numeric_literal
+            }
+        }
+        None => numeric_literal
+    };
+
+    Token::NUMBER(final_numeric_lit.parse().expect("This should be a valid number"))
 }
 
 /**
@@ -109,7 +161,14 @@ fn scan_single_token(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Opt
             '\n' => continue 'main_loop, //TODO: line increment
 
             '"' => get_string_literal_token(iter).expect("unclosed string literal"),
-            _ => todo!()
+            other => {
+                if is_digit(other) {
+                    get_numeric_literal(iter, other)
+                }
+                else{
+                    todo!()
+                }
+            }
         };
 
         return Some(next_token)
@@ -156,5 +215,10 @@ mod tests {
         assert_eq!(scanner::scan_tokens(& String::from("//asdsad asd \n+")), vec![Token::PLUS, Token::EOF]);
 
         assert_eq!(scanner::scan_tokens(& String::from(r#""blah""#)), vec![Token::STRING(String::from("blah")), Token::EOF]);
+
+        assert_eq!(scanner::scan_tokens(& String::from("123")), vec![Token::NUMBER("123".parse().unwrap()), Token::EOF]);
+        assert_eq!(scanner::scan_tokens(& String::from("1.1")), vec![Token::NUMBER("1.1".parse().unwrap()), Token::EOF]);
+        assert_eq!(scanner::scan_tokens(& String::from("1.1 2.2")), vec![Token::NUMBER("1.1".parse().unwrap()), 
+        Token::NUMBER("2.2".parse().unwrap()), Token::EOF]);
     }
 }
