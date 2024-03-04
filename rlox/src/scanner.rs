@@ -1,7 +1,6 @@
 use std::string;
 use std::collections::HashMap;
 
-
 #[derive(PartialEq, Debug, Clone)]
 pub enum Token{
     // Single-character tokens.
@@ -218,7 +217,7 @@ fn scan_single_token(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Opt
 }
 
 
-fn scan_tokens(source_code: &String) -> Vec<Token> {
+pub fn scan_tokens(source_code: &String) -> Vec<Token> {
     let mut result = Vec::new();
 
     let mut iter: std::iter::Peekable<std::str::Chars<'_>> = source_code.chars().peekable();
