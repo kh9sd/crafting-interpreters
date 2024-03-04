@@ -1,3 +1,5 @@
+use std::string;
+
 
 
 #[derive(PartialEq, Debug)]
@@ -13,7 +15,7 @@ pub enum Token{
     LESS, LESS_EQUAL,
 
     // Literals.
-    IDENTIFIER, STRING, NUMBER,
+    IDENTIFIER, STRING(String), NUMBER,
 
     // Keywords.
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
@@ -37,7 +39,26 @@ fn look_ahead_1_char(iter: &mut std::iter::Peekable<std::str::Chars<'_>>, char_t
         None => else_match
     }
 }
+/**
+ * Returns None if end of file and no closing "
+ */
+fn get_string_literal_token(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Option<Token> {
+    let mut string_lit = String::new();
 
+    while let Some(next) = iter.next() {
+        // TODO: line increments
+        if next == '"' { // done with string literal
+            return Some(Token::STRING(string_lit))
+        }
+        string_lit.push(next);
+    }
+
+    return None
+}
+
+/**
+ * Returns None at end of file
+ */
 fn scan_single_token(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Option<Token> {
     'main_loop: while let Some(current) = iter.next() {
         let next_token = match current {
@@ -87,6 +108,7 @@ fn scan_single_token(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> Opt
             ' ' | '\r' | '\t' => continue 'main_loop,
             '\n' => continue 'main_loop, //TODO: line increment
 
+            '"' => get_string_literal_token(iter).expect("unclosed string literal"),
             _ => todo!()
         };
 
@@ -132,5 +154,7 @@ mod tests {
         assert_eq!(scanner::scan_tokens(& String::from("//\n")), vec![Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("//\n+")), vec![Token::PLUS, Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("//asdsad asd \n+")), vec![Token::PLUS, Token::EOF]);
+
+        assert_eq!(scanner::scan_tokens(& String::from(r#""blah""#)), vec![Token::STRING(String::from("blah")), Token::EOF]);
     }
 }
