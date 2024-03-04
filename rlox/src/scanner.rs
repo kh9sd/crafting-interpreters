@@ -63,9 +63,11 @@ fn is_digit(c: char) -> bool {
     }
 }
 
-fn get_numeric_literal(iter: &mut std::iter::Peekable<std::str::Chars<'_>>, first_char: char) -> Token {
+/**
+ * Returns biggest numeric string it can get from the iter
+ */
+fn get_numeric_string(iter: &mut std::iter::Peekable<std::str::Chars<'_>>) -> String {
     let mut numeric_literal = String::new();
-    numeric_literal.push(first_char);
 
     while let Some(next) = iter.peek() {
         let next_char = *next;
@@ -78,25 +80,22 @@ fn get_numeric_literal(iter: &mut std::iter::Peekable<std::str::Chars<'_>>, firs
         }
     }
 
+    numeric_literal
+}
+
+fn get_numeric_literal(iter: &mut std::iter::Peekable<std::str::Chars<'_>>, first_char: char) -> Token {
+    let mut numeric_literal = String::new();
+    numeric_literal.push(first_char);
+
+    numeric_literal = numeric_literal + &get_numeric_string(iter);
+
     // add fractional part
     let final_numeric_lit = match iter.peek() {
         Some(next) => {
             if *next == '.' {
-                numeric_literal.push('.');
-                iter.next();
+                numeric_literal.push(iter.next().expect("We just peeked it"));
 
-                while let Some(next) = iter.peek() {
-                    let next_char = *next;
-                    if is_digit(next_char){
-                        numeric_literal.push(next_char);
-                        iter.next();
-                    }
-                    else {
-                        break;
-                    }
-                }
-                numeric_literal
-
+                numeric_literal + &get_numeric_string(iter)
             }
             else {
                 numeric_literal
