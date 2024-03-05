@@ -1,6 +1,6 @@
-use std::string;
 use std::collections::HashMap;
 
+#[allow(non_camel_case_types)]
 #[derive(PartialEq, Debug, Clone)]
 pub enum Token{
     // Single-character tokens.
@@ -26,7 +26,7 @@ pub enum Token{
 fn look_ahead_1_char(iter: &mut std::iter::Peekable<std::str::Chars<'_>>, char_to_match: char, if_match: Token, else_match: Token) -> Token {
     match iter.peek() {
         Some(char) => {
-            if (*char == char_to_match){
+            if *char == char_to_match{
                 // consume this char
                 iter.next();
                 if_match
@@ -123,23 +123,24 @@ fn get_identifers_or_keywords(iter: &mut std::iter::Peekable<std::str::Chars<'_>
     }
 
     // TODO: make this not run every fucking time
-    let mut keyword_map = HashMap::new();
-    keyword_map.insert("and",    Token::AND);
-    keyword_map.insert("class",  Token::CLASS);
-    keyword_map.insert("else",   Token::ELSE);
-    keyword_map.insert("false",  Token::FALSE);
-    keyword_map.insert("for",    Token::FOR);
-    keyword_map.insert("fun",    Token::FUN);
-    keyword_map.insert("if",     Token::IF);
-    keyword_map.insert("nil",    Token::NIL);
-    keyword_map.insert("or",     Token::OR);
-    keyword_map.insert("print",  Token::PRINT);
-    keyword_map.insert("return", Token::RETURN);
-    keyword_map.insert("super",  Token::SUPER);
-    keyword_map.insert("this",   Token::THIS);
-    keyword_map.insert("true",   Token::TRUE);
-    keyword_map.insert("var",    Token::VAR);
-    keyword_map.insert("while",  Token::WHILE);
+    let keyword_map = HashMap::from([
+        ("and",    Token::AND),
+        ("class",  Token::CLASS),
+        ("else",   Token::ELSE),
+        ("false",  Token::FALSE),
+        ("for",    Token::FOR),
+        ("fun",    Token::FUN),
+        ("if",     Token::IF),
+        ("nil",    Token::NIL),
+        ("or",     Token::OR),
+        ("print",  Token::PRINT),
+        ("return", Token::RETURN),
+        ("super",  Token::SUPER),
+        ("this",   Token::THIS),
+        ("true",   Token::TRUE),
+        ("var",    Token::VAR),
+        ("while",  Token::WHILE),
+    ]);
 
     keyword_map.get(identifier.as_str()).cloned().unwrap_or(Token::IDENTIFIER(identifier))
 }
