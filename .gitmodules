@@ -1,0 +1,3 @@
+[submodule "rlox/craftinginterpreters"]
+	path = rlox/craftinginterpreters
+	url = git@github.com:munificent/craftinginterpreters.git
