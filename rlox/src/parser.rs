@@ -6,7 +6,7 @@ use std::iter::Peekable;
 pub fn parse(token_list: Vec<Token>) -> Expr {
     let mut iter = token_list.iter().peekable();
     
-    comparison(&mut iter)
+    equality(&mut iter)
 }
 
 /**
@@ -21,11 +21,23 @@ pub fn parse(token_list: Vec<Token>) -> Expr {
                 | "(" expression ")" ;
  */
 
-// fn equality(iter: Peekable<std::slice::Iter<'_, Token>>) -> Expr {
+fn equality(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Expr {
+    let mut result = comparison(iter);
 
-
-//     Expr::Number(0.0)
-// }
+    loop
+    {
+        match iter.peek().expect("Iterator should not be exhausted") {
+            Token::BANG_EQUAL | Token::EQUAL_EQUAL =>
+            {
+                result = Expr::Binary(Box::new(result), 
+                    iter.next().expect("We just peeked").clone(), 
+                    Box::new(comparison(iter)))
+            },
+            _ => break
+        }
+    }
+    result
+}
 
 // >, <, >= and <=
 fn comparison(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Expr {
@@ -212,6 +224,33 @@ mod tests {
                                 Token::MINUS,
                                 Box::new(Expr::Number(0.0)))),
                 Token::LESS_EQUAL,
+                Box::new(Expr::Number(0.0))));
+        
+
+        //equality
+        assert_eq!(parse(vec![Token::NUMBER(0.0), Token::BANG_EQUAL, 
+                            Token::NUMBER(0.0), Token::LESS,
+                            Token::NUMBER(0.0),
+                            Token::EOF]), 
+            Expr::Binary(
+                Box::new(Expr::Number(0.0)),
+                Token::BANG_EQUAL,
+                Box::new(
+                    Expr::Binary(Box::new(Expr::Number(0.0)),
+                                Token::LESS,
+                                Box::new(Expr::Number(0.0))))));
+
+        
+        assert_eq!(parse(vec![Token::NUMBER(0.0), Token::GREATER_EQUAL, 
+                            Token::NUMBER(0.0), Token::EQUAL_EQUAL,
+                            Token::NUMBER(0.0),
+                            Token::EOF]), 
+            Expr::Binary(
+                Box::new(
+                    Expr::Binary(Box::new(Expr::Number(0.0)),
+                                Token::GREATER_EQUAL,
+                                Box::new(Expr::Number(0.0)))),
+                Token::EQUAL_EQUAL,
                 Box::new(Expr::Number(0.0))));
 
     }
