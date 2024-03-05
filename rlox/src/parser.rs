@@ -6,7 +6,7 @@ use std::iter::Peekable;
 pub fn parse(token_list: Vec<Token>) -> Expr {
     let mut iter = token_list.iter().peekable();
     
-    unary(&mut iter)
+    factor(&mut iter)
 }
 
 /**
@@ -21,16 +21,34 @@ pub fn parse(token_list: Vec<Token>) -> Expr {
                 | "(" expression ")" ;
  */
 
-fn equality(iter: Peekable<std::slice::Iter<'_, Token>>) -> Expr {
+// fn equality(iter: Peekable<std::slice::Iter<'_, Token>>) -> Expr {
 
 
-    Expr::Number(0.0)
+//     Expr::Number(0.0)
+// }
+
+// fn comparison(iter: Peekable<std::slice::Iter<'_, Token>>) -> Expr {
+//     Expr::Number(0.0)
+// }
+
+
+fn factor(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Expr {
+    let mut result = unary(iter);
+
+    loop
+    {
+        match iter.peek().expect("Iterator should not be exhausted") {
+            Token::STAR | Token::SLASH =>
+            {
+                result = Expr::Binary(Box::new(result), 
+                    iter.next().expect("We just peeked").clone(), 
+                    Box::new(unary(iter)))
+            },
+            _ => break
+        }
+    }
+    result
 }
-
-fn comparison(iter: Peekable<std::slice::Iter<'_, Token>>) -> Expr {
-    Expr::Number(0.0)
-}
-
 
 fn unary(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Expr {
     let next_token = iter.peek().expect("Iterator should not be exhausted");
@@ -80,6 +98,31 @@ mod tests {
         assert_eq!(parse(vec![Token::MINUS, Token::NUMBER(0.0), Token::EOF]), 
             Expr::Unary(Token::MINUS, 
                 Box::new(Expr::Number(0.0))));
+        
+        // factor
+        assert_eq!(parse(vec![Token::NUMBER(0.0), Token::STAR, 
+                            Token::NUMBER(0.0), Token::SLASH,
+                            Token::NUMBER(0.0),
+                            Token::EOF]), 
+            Expr::Binary(
+                Box::new(
+                    Expr::Binary(Box::new(Expr::Number(0.0)),
+                                Token::STAR,
+                                Box::new(Expr::Number(0.0)))), 
+                Token::SLASH,
+                Box::new(Expr::Number(0.0))));
 
+
+        assert_eq!(parse(vec![Token::MINUS, Token::NUMBER(0.0), Token::STAR, 
+                Token::MINUS, Token::NUMBER(0.0),
+                Token::EOF]), 
+        Expr::Binary(
+            Box::new(
+                Expr::Unary(Token::MINUS,
+                    Box::new(Expr::Number(0.0)))), 
+            Token::STAR,
+            Box::new(
+                Expr::Unary(Token::MINUS,
+                    Box::new(Expr::Number(0.0))))));
     }
 }
