@@ -22,15 +22,15 @@ fn main() {
 fn run_prompt() {
     let stdin = io::stdin();
     for line in stdin.lock().lines() {
-        run(line.expect("Fuck bro idk stdin failed???"));
+        run(&line.expect("Fuck bro idk stdin failed???"));
     }
 }
 
 fn run_file(path: &String) {
-    run(std::fs::read_to_string(path).expect("Could not read from file"));
+    run(&std::fs::read_to_string(path).expect("Could not read from file"));
 }
 
-fn run(source: String){
+fn run(source: &String){
     for token in scanner::scan_tokens(&source).iter(){
         println!("{:?}", token);
     }
