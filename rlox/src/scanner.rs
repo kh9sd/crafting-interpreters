@@ -252,6 +252,7 @@ mod tests {
         assert_eq!(scanner::scan_tokens(& String::from("//+")), vec![Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("//\n")), vec![Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("//\n+")), vec![Token::PLUS, Token::EOF]);
+        assert_eq!(scanner::scan_tokens(& String::from("//asd\n+")), vec![Token::PLUS, Token::EOF]);
         assert_eq!(scanner::scan_tokens(& String::from("//asdsad asd \n+")), vec![Token::PLUS, Token::EOF]);
 
         assert_eq!(scanner::scan_tokens(& String::from(r#""blah""#)), vec![Token::STRING(String::from("blah")), Token::EOF]);
