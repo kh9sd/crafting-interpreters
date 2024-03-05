@@ -1,7 +1,7 @@
 
-mod scanner;
-use crate::scanner::Token;
+pub use crate::scanner::Token;
 
+#[derive(PartialEq, Debug, Clone)]
 pub enum Expr {
     //nonterminals
     Binary(Box<Expr>, Token, Box<Expr>),
@@ -11,5 +11,11 @@ pub enum Expr {
     String(String),
     Number(f64),
     Boolean(bool),
+    Nil
 }
 
+pub enum ValueType {
+    Number(f64),
+    Boolean(bool),
+    Nil,
+}
