@@ -123,9 +123,22 @@ fn primary(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Expr {
         Token::TRUE => Expr::Boolean(true),
         Token::FALSE => Expr::Boolean(false),
         Token::NIL => Expr::Nil,
-        // Token::LEFT_PAREN => {
-        //     let expr =
-        // },
+        Token::LEFT_PAREN => {
+            let expr = expression(iter);
+            match iter.next() {
+                Some(x) => {
+                    if let Token::RIGHT_PAREN = x {
+                        // good, just consume and move on
+                    }
+                    else{
+                        panic!("Expected closing parenthesis")
+                    }
+                }
+                None => panic!("Expected closing parenthesis")
+            };
+
+            Expr::Grouping(Box::new(expr))
+        },
         _ => todo!("implement parenthesis case")
     }
 }
@@ -258,6 +271,21 @@ mod tests {
                                 Box::new(Expr::Number(0.0)))),
                 Token::EQUAL_EQUAL,
                 Box::new(Expr::Number(0.0))));
+        
+        // parenthesis
+        assert_eq!(parse(vec![Token::NUMBER(0.0), Token::STAR, 
+                            Token::LEFT_PAREN,
+                            Token::NUMBER(0.0), Token::PLUS,
+                            Token::NUMBER(0.0),
+                            Token::RIGHT_PAREN,
+                            Token::EOF]), 
 
+            Expr::Binary(Box::new(Expr::Number(0.0)),
+                        Token::STAR,
+                        Box::new(Expr::Grouping(
+                            Box::new(Expr::Binary(
+                                Box::new(Expr::Number(0.0)),
+                                Token::PLUS,
+                                Box::new(Expr::Number(0.0))))))));
     }
 }
