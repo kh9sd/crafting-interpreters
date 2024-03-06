@@ -14,8 +14,3 @@ pub enum Expr {
     Nil
 }
 
-pub enum ValueType {
-    Number(f64),
-    Boolean(bool),
-    Nil,
-}
