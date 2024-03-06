@@ -6,9 +6,12 @@ use std::iter::Peekable;
 pub fn parse(token_list: Vec<Token>) -> Expr {
     let mut iter = token_list.iter().peekable();
     
-    equality(&mut iter)
+    expression(&mut iter)
 }
 
+fn expression(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Expr {
+    equality(iter)
+}
 /**
  * expression     → equality ;
     equality       → comparison ( ( "!=" | "==" ) comparison )* ;
@@ -120,6 +123,9 @@ fn primary(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Expr {
         Token::TRUE => Expr::Boolean(true),
         Token::FALSE => Expr::Boolean(false),
         Token::NIL => Expr::Nil,
+        // Token::LEFT_PAREN => {
+        //     let expr =
+        // },
         _ => todo!("implement parenthesis case")
     }
 }
