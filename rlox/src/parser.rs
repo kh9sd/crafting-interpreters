@@ -3,7 +3,7 @@ pub use crate::scanner::Token;
 use std::iter::Peekable;
 
 
-pub fn parse(token_list: Vec<Token>) -> Expr {
+pub fn parse(token_list: &Vec<Token>) -> Expr {
     let mut iter = token_list.iter().peekable();
     
     expression(&mut iter)
