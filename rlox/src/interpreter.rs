@@ -23,6 +23,15 @@ pub fn evaluate(expression_tree: &Expr) -> ValueType{
     }
 }
 
+pub fn stringify_valuetype(val: &ValueType) -> String{
+    match val {
+        ValueType::Boolean(b) => b.to_string(),
+        ValueType::Nil => String::from("Nil"),
+        ValueType::Number(x) => x.to_string(),
+        ValueType::String(s) => s.clone()
+    }
+}
+
 fn binary_funct(operation: &Token, left_expr: &Expr, right_expr: &Expr) -> ValueType {
     match operation {
         Token::STAR => {

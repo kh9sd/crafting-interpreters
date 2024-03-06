@@ -35,5 +35,5 @@ fn run_file(path: &String) {
 fn run(source: &String){
     let token_list = scanner::scan_tokens(&source);
     let expression_tree = parser::parse(&token_list);
-    println!("{:?}", interpreter::evaluate(&expression_tree));
+    println!("{:?}", interpreter::stringify_valuetype(&interpreter::evaluate(&expression_tree)));
 }
