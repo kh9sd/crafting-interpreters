@@ -1,7 +1,9 @@
 use std::env;
 use std::io::{self, BufRead};
 mod scanner;
-
+mod tree_nodes;
+mod parser;
+mod interpreter;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -31,7 +33,7 @@ fn run_file(path: &String) {
 }
 
 fn run(source: &String){
-    for token in scanner::scan_tokens(&source).iter(){
-        println!("{:?}", token);
-    }
+    let token_list = scanner::scan_tokens(&source);
+    let expression_tree = parser::parse(&token_list);
+    println!("{:?}", interpreter::evaluate(&expression_tree));
 }
