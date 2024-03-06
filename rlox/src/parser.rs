@@ -1,7 +1,19 @@
-use crate::tree_nodes::Expr;
-pub use crate::scanner::Token;
 use std::iter::Peekable;
 
+pub use crate::scanner::Token;
+
+#[derive(PartialEq, Debug, Clone)]
+pub enum Expr {
+    //nonterminals
+    Binary(Box<Expr>, Token, Box<Expr>),
+    Grouping(Box<Expr>),
+    Unary(Token, Box<Expr>),
+    //terminals
+    String(String),
+    Number(f64),
+    Boolean(bool),
+    Nil
+}
 
 pub fn parse(token_list: &Vec<Token>) -> Expr {
     let mut iter = token_list.iter().peekable();

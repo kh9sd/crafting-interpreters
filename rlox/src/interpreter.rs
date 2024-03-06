@@ -1,4 +1,4 @@
-use crate::tree_nodes::Expr;
+use crate::parser::Expr;
 pub use crate::scanner::Token;
 
 #[derive(PartialEq, Debug, Clone)]
