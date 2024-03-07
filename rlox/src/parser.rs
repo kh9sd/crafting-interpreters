@@ -15,12 +15,71 @@ pub enum Expr {
     Nil
 }
 
-pub fn parse(token_list: &Vec<Token>) -> Expr {
-    let mut iter = token_list.iter().peekable();
-    
-    expression(&mut iter)
+#[derive(PartialEq, Debug, Clone)]
+pub enum Stmt {
+    Expression(Expr),
+    Print(Expr),
 }
 
+// fn program
+
+
+/**
+ * program        → statement* EOF ;
+
+    statement      → exprStmt
+                | printStmt ;
+
+    exprStmt       → expression ";" ;
+    printStmt      → "print" expression ";" ;
+ */
+fn program(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Vec<Stmt> {
+    let mut result = Vec::new();
+
+    while let Some(_) = iter.peek() {
+        result.push(statement(iter));
+    };
+
+    result
+}
+
+fn statement(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Stmt {
+    match iter.peek().expect("Iterator should not be exhausted") {
+        Token::PRINT => {
+            // consume print token
+            iter.next();
+            printStmt(iter)
+        }
+        _ => {
+            exprStmt(iter)
+        }
+    }
+}
+
+fn printStmt(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Stmt {
+    let expr = expression(iter);
+
+    match iter.next().expect("Iterator should not be empty"){
+        Token::SEMICOLON => Stmt::Print(expr),
+        other => panic!("Bad token after expression, {:?}", other)
+    }
+}
+
+fn exprStmt(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Stmt {
+    let expr = expression(iter);
+
+    match iter.next().expect("Iterator should not be empty"){
+        Token::SEMICOLON => Stmt::Expression(expr),
+        other => panic!("Bad token after expression, {:?}", other)
+    }
+}
+
+
+
+
+/**
+ * Expression grammar impl
+ */
 fn expression(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Expr {
     equality(iter)
 }
