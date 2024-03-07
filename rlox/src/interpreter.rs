@@ -1,4 +1,5 @@
 use crate::parser::Expr;
+use crate::parser::Stmt;
 pub use crate::scanner::Token;
 
 #[derive(PartialEq, Debug, Clone)]
@@ -9,7 +10,19 @@ pub enum ValueType {
     Nil,
 }
 
-pub fn evaluate(expression_tree: &Expr) -> ValueType{
+pub fn stmt_eval(statement: &Stmt) {
+    match statement {
+        Stmt::Expression(expr) => {
+            let _ = evaluate(expr);
+            // do nothing???
+        },
+        Stmt::Print(expr) => {
+            println!("{:?}", stringify_valuetype(&evaluate(expr)));
+        }
+    }
+}
+
+fn evaluate(expression_tree: &Expr) -> ValueType{
     match expression_tree {
         Expr::Binary(left, op, right) => binary_funct(op, left, right),
         Expr::Unary(op, expr) => unary_funct(op, expr),

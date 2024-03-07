@@ -33,6 +33,10 @@ fn run_file(path: &String) {
 
 fn run(source: &String){
     let token_list = scanner::scan_tokens(&source);
-    let expression_tree = parser::parse(&token_list);
-    println!("{:?}", interpreter::stringify_valuetype(&interpreter::evaluate(&expression_tree)));
+    let statements = parser::program(&mut token_list.iter().peekable());
+    //println!("{:?}", interpreter::stringify_valuetype(&interpreter::stmt_eval(&statements)));
+
+    for statement in statements {
+        interpreter::stmt_eval(&statement);
+    }
 }
