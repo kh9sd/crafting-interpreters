@@ -21,9 +21,6 @@ pub enum Stmt {
     Print(Expr),
 }
 
-// fn program
-
-
 /**
  * program        → statement* EOF ;
 
@@ -33,10 +30,14 @@ pub enum Stmt {
     exprStmt       → expression ";" ;
     printStmt      → "print" expression ";" ;
  */
-fn program(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Vec<Stmt> {
+pub fn program(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Vec<Stmt> {
     let mut result = Vec::new();
 
-    while let Some(_) = iter.peek() {
+    loop {
+        let x = iter.peek().expect("Iterator should not be exhausted");
+        if let Token::EOF = x {
+            break;
+        }
         result.push(statement(iter));
     };
 
@@ -210,7 +211,7 @@ fn primary(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Expr {
 
             Expr::Grouping(Box::new(expr))
         },
-        _ => todo!("implement parenthesis case")
+        other => panic!("Bad token, {:?}", other)
     }
 }
 
