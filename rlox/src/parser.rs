@@ -57,6 +57,7 @@ fn statement(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Stmt {
     }
 }
 
+#[allow(non_snake_case)]
 fn printStmt(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Stmt {
     let expr = expression(iter);
 
@@ -66,6 +67,7 @@ fn printStmt(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Stmt {
     }
 }
 
+#[allow(non_snake_case)]
 fn exprStmt(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Stmt {
     let expr = expression(iter);
 
