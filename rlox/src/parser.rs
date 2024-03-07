@@ -156,6 +156,11 @@ fn primary(iter: &mut Peekable<std::slice::Iter<'_, Token>>) -> Expr {
 }
 
 
+fn parse(token_list: &Vec<Token>) -> Expr {
+    let mut iter = token_list.iter().peekable();
+    
+    expression(&mut iter)
+}
 #[cfg(test)]
 mod tests {
     use crate::{parser::parse, scanner::Token};
@@ -163,24 +168,24 @@ mod tests {
     #[test]
     fn parse_tests() {
         // terminals
-        assert_eq!(parse(vec![Token::TRUE, Token::EOF]), Expr::Boolean(true));
-        assert_eq!(parse(vec![Token::FALSE, Token::EOF]), Expr::Boolean(false));
-        assert_eq!(parse(vec![Token::NIL, Token::EOF]), Expr::Nil);
-        assert_eq!(parse(vec![Token::STRING(String::from("blah")), 
+        assert_eq!(parse(&vec![Token::TRUE, Token::EOF]), Expr::Boolean(true));
+        assert_eq!(parse(&vec![Token::FALSE, Token::EOF]), Expr::Boolean(false));
+        assert_eq!(parse(&vec![Token::NIL, Token::EOF]), Expr::Nil);
+        assert_eq!(parse(&vec![Token::STRING(String::from("blah")), 
             Token::EOF]), Expr::String(String::from("blah")));
-        assert_eq!(parse(vec![Token::NUMBER(0.0), Token::EOF]), Expr::Number(0.0));
+        assert_eq!(parse(&vec![Token::NUMBER(0.0), Token::EOF]), Expr::Number(0.0));
 
         // unary 
-        assert_eq!(parse(vec![Token::BANG, Token::TRUE, Token::EOF]), 
+        assert_eq!(parse(&vec![Token::BANG, Token::TRUE, Token::EOF]), 
             Expr::Unary(Token::BANG, 
                 Box::new(Expr::Boolean(true))));
 
-        assert_eq!(parse(vec![Token::MINUS, Token::NUMBER(0.0), Token::EOF]), 
+        assert_eq!(parse(&vec![Token::MINUS, Token::NUMBER(0.0), Token::EOF]), 
             Expr::Unary(Token::MINUS, 
                 Box::new(Expr::Number(0.0))));
         
         // factor
-        assert_eq!(parse(vec![Token::NUMBER(0.0), Token::STAR, 
+        assert_eq!(parse(&vec![Token::NUMBER(0.0), Token::STAR, 
                             Token::NUMBER(0.0), Token::SLASH,
                             Token::NUMBER(0.0),
                             Token::EOF]), 
@@ -193,7 +198,7 @@ mod tests {
                 Box::new(Expr::Number(0.0))));
 
 
-        assert_eq!(parse(vec![Token::MINUS, Token::NUMBER(0.0), Token::STAR, 
+        assert_eq!(parse(&vec![Token::MINUS, Token::NUMBER(0.0), Token::STAR, 
                 Token::MINUS, Token::NUMBER(0.0),
                 Token::EOF]), 
         Expr::Binary(
@@ -206,7 +211,7 @@ mod tests {
                     Box::new(Expr::Number(0.0))))));
         
         // term
-        assert_eq!(parse(vec![Token::NUMBER(0.0), Token::MINUS, 
+        assert_eq!(parse(&vec![Token::NUMBER(0.0), Token::MINUS, 
                             Token::NUMBER(0.0), Token::SLASH,
                             Token::NUMBER(0.0),
                             Token::EOF]), 
@@ -219,7 +224,7 @@ mod tests {
                                 Box::new(Expr::Number(0.0))))));
 
         
-        assert_eq!(parse(vec![Token::NUMBER(0.0), Token::STAR, 
+        assert_eq!(parse(&vec![Token::NUMBER(0.0), Token::STAR, 
                             Token::NUMBER(0.0), Token::PLUS,
                             Token::NUMBER(0.0),
                             Token::EOF]), 
@@ -232,7 +237,7 @@ mod tests {
                 Box::new(Expr::Number(0.0))));
 
         //comparison
-        assert_eq!(parse(vec![Token::NUMBER(0.0), Token::GREATER, 
+        assert_eq!(parse(&vec![Token::NUMBER(0.0), Token::GREATER, 
                             Token::NUMBER(0.0), Token::PLUS,
                             Token::NUMBER(0.0),
                             Token::EOF]), 
@@ -245,7 +250,7 @@ mod tests {
                                 Box::new(Expr::Number(0.0))))));
 
         
-        assert_eq!(parse(vec![Token::NUMBER(0.0), Token::MINUS, 
+        assert_eq!(parse(&vec![Token::NUMBER(0.0), Token::MINUS, 
                             Token::NUMBER(0.0), Token::LESS_EQUAL,
                             Token::NUMBER(0.0),
                             Token::EOF]), 
@@ -259,7 +264,7 @@ mod tests {
         
 
         //equality
-        assert_eq!(parse(vec![Token::NUMBER(0.0), Token::BANG_EQUAL, 
+        assert_eq!(parse(&vec![Token::NUMBER(0.0), Token::BANG_EQUAL, 
                             Token::NUMBER(0.0), Token::LESS,
                             Token::NUMBER(0.0),
                             Token::EOF]), 
@@ -272,7 +277,7 @@ mod tests {
                                 Box::new(Expr::Number(0.0))))));
 
         
-        assert_eq!(parse(vec![Token::NUMBER(0.0), Token::GREATER_EQUAL, 
+        assert_eq!(parse(&vec![Token::NUMBER(0.0), Token::GREATER_EQUAL, 
                             Token::NUMBER(0.0), Token::EQUAL_EQUAL,
                             Token::NUMBER(0.0),
                             Token::EOF]), 
@@ -285,7 +290,7 @@ mod tests {
                 Box::new(Expr::Number(0.0))));
         
         // parenthesis
-        assert_eq!(parse(vec![Token::NUMBER(0.0), Token::STAR, 
+        assert_eq!(parse(&vec![Token::NUMBER(0.0), Token::STAR, 
                             Token::LEFT_PAREN,
                             Token::NUMBER(0.0), Token::PLUS,
                             Token::NUMBER(0.0),
